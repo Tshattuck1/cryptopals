@@ -8,17 +8,16 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
     @OptIn(ExperimentalEncodingApi::class)
     fun challenge1(input: String): String {
-        return Base64.encode(input.chunked(2).map { it.toInt(16).toByte() }.toByteArray())
+        return Base64.encode(input.fromHex())
     }
 
     fun challenge2(input: String, cypher: String):String {
-        val inputBytes = input.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-        val cypherBytes = cypher.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+        val inputBytes = input.fromHex()
+        val cypherBytes = cypher.fromHex()
         val result = inputBytes.zip(cypherBytes).map { (a, b) -> a xor b }.toByteArray()
         return result.joinToString("") { "%02x".format(it) }
     }
 
-    //Crptopals set 1 challenge 3
     fun challenge3(input: String): List<Pair<String, Double>> {
         val ciphertext = input.fromHex();
         val keys = ('A'..'z').toMutableList()
@@ -28,7 +27,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
     }
 
     fun challenge4(path: String): Pair<String, Double> {
-        return File(path).readLines().flatMap { challenge3(it) }.maxBy { it.second }
+        val lines = File(path).readLines().flatMap { challenge3(it) }
+        return lines.maxBy { it.second }
     }
 
     fun englishScore(text: String): Pair<String, Double> {
@@ -44,7 +44,6 @@ import kotlin.io.encoding.ExperimentalEncodingApi
     }
 
     fun String.fromHex(): ByteArray {
-        check(length % 2 == 0)
         return chunked(2)
             .map { it.toInt(16).toByte() }
             .toByteArray()
